@@ -148,7 +148,7 @@ def main():
 
     # Work in the current directory (existing repo)
 
-    # Create commits for each "pixel"
+    # Create commits for each "pixel" and push in batches
     commit_count = 0
     for col in range(grid_width):
         for row in range(7):
@@ -178,16 +178,23 @@ def main():
                     )
                     commit_count += 1
 
-        print(f"  ▓ Column {col+1}/{grid_width} done ({commit_count} commits)")
+        # Push after every column (week) to help GitHub index properly
+        push_result = subprocess.run(
+            ["git", "push", "origin", "main"],
+            capture_output=True, text=True
+        )
+        if push_result.returncode != 0:
+            print(f"  ⚠️  Push failed, retrying...")
+            subprocess.run(["git", "push", "origin", "main"], check=True)
+
+        print(f"  ▓ Column {col+1}/{grid_width} done ({commit_count} commits) - pushed!")
 
     print(f"\n  {'═'*50}")
-    print(f"  ✅ DONE! Created {commit_count} commits.")
+    print(f"  ✅ DONE! Created and pushed {commit_count} commits.")
     print(f"  {'═'*50}")
-    print(f"\n  Next steps:")
-    print(f"    git push origin master")
-    print(f"")
-    print(f"  Visit your profile → 2025 contribution graph")
-    print(f"  Your 3D 'HIRE ME' will be there! 🔥")
+    print(f"\n  Visit your profile → 2025 contribution graph")
+    print(f"  Your 3D 'HIRE ME' should be there! 🔥")
+    print(f"\n  Note: GitHub may take up to 24h to fully render all squares.")
 
 
 if __name__ == "__main__":
